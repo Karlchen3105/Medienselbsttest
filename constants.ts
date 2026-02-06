@@ -18,7 +18,7 @@ export const QUESTIONS: Question[] = [
   { id: 7, text: 'Denken Sie darüber nach, dass Sie weniger Zeit mit Medien verbringen sollten?' },
   { id: 8, text: 'Haben Sie bereits versucht, Ihre Medienzeit zu verringern, ohne dauerhaften Erfolg?' },
   { id: 9, text: 'Erledigen Sie Aufgaben schneller oder oberflächlicher, um früher Medien nutzen zu können?' },
-  { id: 10, text: 'Vernachlässigen Sie berufliche oder private Pflichten, Arbeit, Familienleben, häusliche Aufgaben, zugunsten von Medien?' },
+  { id: 10, text: 'Vernachlässigen Sie berufliche oder private Pflichten (Arbeit, Familienleben, häusliche Aufgaben, ...) zugunsten von Medien?' },
   { id: 11, text: 'Nutzen Sie Medien, wenn Sie sich niedergeschlagen fühlen?' },
   { id: 12, text: 'Greifen Sie zu Medien, um Sorgen zu entkommen oder um sich von einer negativen Stimmung zu entlasten?' },
   { id: 13, text: 'Fühlen Sie sich unruhig, frustriert oder gereizt, wenn Sie zeitweise keinen Zugang zu Medien haben?' },
