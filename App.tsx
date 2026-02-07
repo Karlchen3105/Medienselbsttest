@@ -21,6 +21,9 @@ const App: React.FC = () => {
   // Review Screen Editing State
   const [editingId, setEditingId] = useState<number | null>(null);
 
+  // Animierte Punktzahl auf der Ergebnis-Seite (Count-up)
+  const [displayScore, setDisplayScore] = useState(0);
+
   // --- Effects ---
 
   useEffect(() => {
@@ -32,6 +35,27 @@ const App: React.FC = () => {
       localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
+
+  // Count-up-Animation der Punktzahl, wenn Ergebnis-Seite angezeigt wird
+  useEffect(() => {
+    if (step !== 'result') {
+      setDisplayScore(0);
+      return;
+    }
+    const target = Object.values(answers).reduce((sum: number, val) => sum + Number(val), 0) as number;
+    setDisplayScore(0);
+    const duration = 1200;
+    const startTime = performance.now();
+    function tick(now: number) {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const eased = 1 - (1 - t) * (1 - t);
+      setDisplayScore(Math.round(eased * target));
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    const id = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(id);
+  }, [step, answers]);
 
   // --- Actions ---
 
@@ -137,6 +161,10 @@ const App: React.FC = () => {
           <li className="flex gap-2">
             <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-zinc-600 rounded-full mt-2 shrink-0" />
             Das Ergebnis dient nur Ihrer persönlichen Orientierung.
+          </li>
+          <li className="flex gap-2">
+            <span className="w-1.5 h-1.5 bg-gray-300 dark:bg-zinc-600 rounded-full mt-2 shrink-0" />
+            Der Test ist anonym, komplett anonym.
           </li>
         </ul>
       </div>
@@ -332,16 +360,16 @@ const App: React.FC = () => {
     const maxScore = QUESTIONS.length * 4;
 
     return (
-      <div className="max-w-2xl mx-auto px-6 py-20 animate-fade-in">
-        <div className="text-center mb-12">
+      <div className="max-w-2xl mx-auto px-6 py-20">
+        <div className="text-center mb-12 result-reveal" style={{ animationDelay: '0ms' }}>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Ihr Ergebnis</h2>
           <div className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide font-semibold">Selbstreflexion abgeschlossen</div>
         </div>
 
-        <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl shadow-lg border border-gray-100 dark:border-zinc-800 overflow-hidden mb-10">
+        <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl shadow-lg border border-gray-100 dark:border-zinc-800 overflow-hidden mb-10 result-reveal result-reveal-card" style={{ animationDelay: '80ms' }}>
           <div className="p-8 sm:p-12 text-center border-b border-gray-100 dark:border-zinc-800 bg-gradient-to-b from-gray-50 to-white dark:from-zinc-800/50 dark:to-[#1C1C1E]">
-            <div className={`text-6xl font-bold mb-2 ${evaluation.colorClass}`}>
-              {score}
+            <div className={`text-6xl font-bold mb-2 result-score ${evaluation.colorClass}`}>
+              {displayScore}
               <span className="text-2xl text-gray-400 dark:text-gray-500 font-normal ml-1">/ {maxScore}</span>
             </div>
             <p className="text-gray-500 dark:text-gray-400 font-medium">Gesamtpunktzahl</p>
@@ -358,7 +386,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 mb-10 flex gap-4 items-start border border-blue-100 dark:border-blue-900/30">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 mb-6 flex gap-4 items-start border border-blue-100 dark:border-blue-900/30 result-reveal" style={{ animationDelay: '200ms' }}>
            <Info className="w-6 h-6 text-blue-600 dark:text-blue-400 shrink-0 mt-1" />
            <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
              Hinweis: Dieser Test dient zur ersten Einschätzung und ersetzt keine professionelle Diagnose. 
@@ -366,12 +394,26 @@ const App: React.FC = () => {
            </p>
         </div>
 
-        <div className="flex justify-center pb-20">
+        {/* Abschluss-Infobox: stärkerer Fokus als der Wiederholen-Button */}
+        <div
+          className="rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 flex items-center gap-4 p-5 sm:p-6 mb-6 result-reveal"
+          style={{ animationDelay: '320ms' }}
+          aria-label="Selbsttest beendet"
+        >
+          <div className="shrink-0 w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center result-check">
+            <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+          </div>
+          <p className="text-base sm:text-lg text-gray-700 dark:text-gray-200 leading-snug font-medium">
+            Der Selbsttest ist beendet. Bitte kehren Sie ins Übersichtsprogramm zurück.
+          </p>
+        </div>
+
+        <div className="flex justify-center pb-20 result-reveal" style={{ animationDelay: '420ms' }}>
           <button
             onClick={resetTest}
-            className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-200 font-semibold rounded-full hover:bg-gray-50 dark:hover:bg-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600 transition-all shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium rounded-full border border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600 transition-all"
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw className="w-4 h-4" />
             Test wiederholen
           </button>
         </div>
@@ -410,6 +452,62 @@ const App: React.FC = () => {
         }
         .animate-scale-in {
           animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        /* Apple-style Ergebnis-Seite: dezent, gestaffelt, weich */
+        @keyframes resultReveal {
+          from {
+            opacity: 0;
+            transform: translateY(14px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes resultCardReveal {
+          from {
+            opacity: 0;
+            transform: translateY(14px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        @keyframes resultScoreIn {
+          from {
+            opacity: 0;
+            transform: scale(0.92);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        @keyframes resultCheckIn {
+          from {
+            opacity: 0;
+            transform: scale(0.6);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .result-reveal {
+          animation: resultReveal 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+          opacity: 0;
+        }
+        .result-reveal-card {
+          animation-name: resultCardReveal;
+        }
+        .result-score {
+          animation: resultScoreIn 0.6s cubic-bezier(0.34, 1.2, 0.64, 1) 0.25s forwards;
+          opacity: 0;
+        }
+        .result-check {
+          animation: resultCheckIn 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) 0.15s forwards;
+          opacity: 0;
         }
       `}</style>
     </div>
